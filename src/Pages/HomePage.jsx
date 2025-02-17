@@ -35,8 +35,7 @@ const HomePage = () => {
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prevSlide) => (prevSlide + 1) % slides.length);
-    }, 5000); // Her 5 saniyede bir değişecek
-
+    }, 5000); 
     return () => clearInterval(timer);
   }, []);
 
