@@ -6,6 +6,8 @@ import ShopPage from './Pages/ShopPage';
 import ProductDetailPage from './Pages/ProductDetailPage';
 import ContactPage from './Pages/ContactPage';
 import TeamPage from './Pages/TeamPage';
+import SignupPage from './Pages/SignupPage';
+import LoginPage from './Pages/LoginPage';
 import './App.css';
 
 function App() {
@@ -20,6 +22,8 @@ function App() {
             <Route exact path="/product/:id" component={ProductDetailPage} />
             <Route exact path="/contact" component={ContactPage} />
             <Route exact path="/team" component={TeamPage} />
+            <Route exact path="/signup" component={SignupPage} />
+            <Route exact path="/login" component={LoginPage} />
           </Switch>
         </main>
         <Footer />
