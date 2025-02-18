@@ -47,10 +47,10 @@ const Header = () => {
           </div>
 
           <div className="flex items-center space-x-6">
-            <button className="flex items-center text-[#23856D] hover:text-[#23856D]/80 text-sm font-medium">
+            <Link to="/login" className="flex items-center text-[#23856D] hover:text-[#23856D]/80 text-sm font-medium">
               <User size={16} className="mr-1" />
               Login / Register
-            </button>
+            </Link>
             <button className="text-[#23856D]">
               <Search size={16} />
             </button>
