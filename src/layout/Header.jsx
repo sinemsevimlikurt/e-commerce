@@ -1,9 +1,32 @@
+import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
 import { Phone, Mail, Instagram, Youtube, Facebook, Twitter, Heart, ShoppingCart, User, Search, ChevronDown, ChevronRight } from 'lucide-react';
 
 const Header = () => {
   const [isShopDropdownOpen, setIsShopDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const timerRef = useRef(null);
+
+  const handleMouseEnter = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+    setIsShopDropdownOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    timerRef.current = setTimeout(() => {
+      setIsShopDropdownOpen(false);
+    }, 100);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, []);
 
   return (
     <header className="w-full">
@@ -42,9 +65,10 @@ const Header = () => {
             <div className="flex items-center space-x-6">
               <Link to="/" className="text-[#737373] hover:text-[#23856D] text-sm font-medium">Home</Link>
               <div 
+                ref={dropdownRef}
                 className="relative group"
-                onMouseEnter={() => setIsShopDropdownOpen(true)}
-                onMouseLeave={() => setIsShopDropdownOpen(false)}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
               >
                 <button className="flex items-center space-x-1 text-gray-700 hover:text-blue-600">
                   <span>Shop</span>
