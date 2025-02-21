@@ -19,7 +19,10 @@ const LoginPage = () => {
         setError(null);
         try {
             const response = await api.post('/login', data);
-            localStorage.setItem('token', response.data.token);
+            if (data.rememberMe) {
+                localStorage.setItem('token', response.data.token);
+            }
+            api.defaults.headers.common['Authorization'] = response.data.token;
             history.push('/');
         } catch (err) {
             setError(err.response?.data?.message || 'An error occurred during login');
@@ -50,9 +53,7 @@ const LoginPage = () => {
                         })}
                         className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#23856D]"
                     />
-                    {errors.email && (
-                        <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
-                    )}
+                    {errors.email && <span className="text-red-500 text-sm">{errors.email.message}</span>}
                 </div>
                 <div>
                     <label className="block text-gray-700 mb-2">Password</label>
@@ -67,9 +68,15 @@ const LoginPage = () => {
                         })}
                         className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#23856D]"
                     />
-                    {errors.password && (
-                        <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
-                    )}
+                    {errors.password && <span className="text-red-500 text-sm">{errors.password.message}</span>}
+                </div>
+                <div className="flex items-center">
+                    <input
+                        type="checkbox"
+                        {...register('rememberMe')}
+                        className="mr-2"
+                    />
+                    <label className="text-gray-700">Remember Me</label>
                 </div>
                 <button
                     type="submit"
