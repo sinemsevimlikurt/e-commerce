@@ -3,7 +3,7 @@ import { Provider } from 'react-redux';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import store from './store';
-import { setupAxiosInterceptors, verifyToken } from './services/api';
+import api, { setupAxiosInterceptors, verifyToken } from './services/api';
 import { setUser } from './store/slices/authSlice';
 import Header from './layout/Header';
 import Footer from './layout/Footer';
@@ -22,44 +22,45 @@ const AppContent = () => {
 
   useEffect(() => {
     const initializeAuth = async () => {
-      const user = await verifyToken();
-      if (user) {
-        dispatch(setUser(user));
+      const userData = await verifyToken();
+      if (userData) {
+        dispatch(setUser(userData));
       }
     };
 
-    setupAxiosInterceptors();
     initializeAuth();
   }, [dispatch]);
 
   return (
-    <Router>
-      <div className="flex flex-col min-h-screen">
-        <Header />
-        <main className="flex-grow">
-          <Switch>
-            <Route exact path="/" component={HomePage} />
-            <Route exact path="/shop" component={ShopPage} />
-            <Route exact path="/product/:id" component={ProductDetailPage} />
-            <Route exact path="/contact" component={ContactPage} />
-            <Route exact path="/team" component={TeamPage} />
-            <Route exact path="/signup" component={SignupPage} />
-            <Route exact path="/login" component={LoginPage} />
-            <Route exact path="/about" component={About} />
-          </Switch>
-        </main>
-        <Footer />
-      </div>
-    </Router>
+    <div className="App">
+      <Header />
+      <Switch>
+        <Route exact path="/" component={HomePage} />
+        <Route path="/shop" component={ShopPage} />
+        <Route path="/product/:id" component={ProductDetailPage} />
+        <Route path="/contact" component={ContactPage} />
+        <Route path="/team" component={TeamPage} />
+        <Route path="/signup" component={SignupPage} />
+        <Route path="/login" component={LoginPage} />
+        <Route path="/about" component={About} />
+      </Switch>
+      <Footer />
+    </div>
   );
 };
 
-function App() {
+const App = () => {
+  useEffect(() => {
+    setupAxiosInterceptors();
+  }, []);
+
   return (
     <Provider store={store}>
-      <AppContent />
+      <Router>
+        <AppContent />
+      </Router>
     </Provider>
   );
-}
+};
 
 export default App;

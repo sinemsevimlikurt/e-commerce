@@ -1,0 +1,36 @@
+/* Dropdown animation */
+.dropdown-enter {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.dropdown-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 200ms, transform 200ms;
+}
+
+.dropdown-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.dropdown-exit-active {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 200ms, transform 200ms;
+}
+
+/* Hover effect for dropdown items */
+.dropdown-item {
+  transition: background-color 150ms;
+}
+
+.dropdown-item:hover {
+  background-color: rgba(35, 133, 109, 0.05);
+}
+
+/* Rating stars */
+.rating-star {
+  color: #FFB800;
+}
