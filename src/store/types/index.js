@@ -4,6 +4,13 @@ export const SET_ROLES = 'SET_ROLES';
 export const SET_THEME = 'SET_THEME';
 export const SET_LANGUAGE = 'SET_LANGUAGE';
 
+// Authentication Action Types
+export const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
+export const LOGIN_FAILURE = 'LOGIN_FAILURE';
+export const LOGOUT = 'LOGOUT';
+export const VERIFY_TOKEN_SUCCESS = 'VERIFY_TOKEN_SUCCESS';
+export const VERIFY_TOKEN_FAILURE = 'VERIFY_TOKEN_FAILURE';
+
 // Product Action Types
 export const SET_CATEGORIES = 'SET_CATEGORIES';
 export const SET_PRODUCT_LIST = 'SET_PRODUCT_LIST';
