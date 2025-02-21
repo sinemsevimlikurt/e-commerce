@@ -8,6 +8,7 @@ import ContactPage from './Pages/ContactPage';
 import TeamPage from './Pages/TeamPage';
 import SignupPage from './Pages/SignupPage';
 import LoginPage from './Pages/LoginPage';
+import About from './components/about/About';
 import './App.css';
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
             <Route exact path="/team" component={TeamPage} />
             <Route exact path="/signup" component={SignupPage} />
             <Route exact path="/login" component={LoginPage} />
+            <Route exact path="/about" component={About} />
           </Switch>
         </main>
         <Footer />
