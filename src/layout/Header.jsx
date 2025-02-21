@@ -1,9 +1,32 @@
+import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
 import { Phone, Mail, Instagram, Youtube, Facebook, Twitter, Heart, ShoppingCart, User, Search, ChevronDown, ChevronRight } from 'lucide-react';
 
 const Header = () => {
   const [isShopDropdownOpen, setIsShopDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const timerRef = useRef(null);
+
+  const handleMouseEnter = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+    setIsShopDropdownOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    timerRef.current = setTimeout(() => {
+      setIsShopDropdownOpen(false);
+    }, 100);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, []);
 
   return (
     <header className="w-full">
@@ -42,14 +65,15 @@ const Header = () => {
             <div className="flex items-center space-x-6">
               <Link to="/" className="text-[#737373] hover:text-[#23856D] text-sm font-medium">Home</Link>
               <div 
+                ref={dropdownRef}
                 className="relative group"
-                onMouseEnter={() => setIsShopDropdownOpen(true)}
-                onMouseLeave={() => setIsShopDropdownOpen(false)}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
               >
-                <button className="flex items-center space-x-1 text-gray-700 hover:text-blue-600">
+                <Link to="/shop" className="flex items-center space-x-1 text-gray-700 hover:text-blue-600">
                   <span>Shop</span>
                   <ChevronDown size={16} />
-                </button>
+                </Link>
                 {isShopDropdownOpen && (
                   <div className="absolute left-0 mt-2 w-screen max-w-6xl bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 -translate-x-1/3">
                     <div className="p-6">

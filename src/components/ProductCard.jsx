@@ -1,42 +1,63 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Star } from 'lucide-react';
 
 const ProductCard = ({ product }) => {
+  const { id, name, description, price, rating, images, stock, sell_count } = product;
+
+  const renderRatingStars = () => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 !== 0;
+
+    for (let i = 0; i < 5; i++) {
+      if (i < fullStars) {
+        stars.push(<Star key={i} className="fill-yellow-400 text-yellow-400" size={16} />);
+      } else if (i === fullStars && hasHalfStar) {
+        stars.push(<Star key={i} className="fill-yellow-400 text-yellow-400" size={16} style={{ clipPath: 'inset(0 50% 0 0)' }} />);
+      } else {
+        stars.push(<Star key={i} className="text-gray-300" size={16} />);
+      }
+    }
+    return stars;
+  };
+
   return (
-    <div data-slot="card" className="text-card-foreground flex flex-col rounded-xl border group gap-2 pb-10 border-none shadow-none">
-      <div data-slot="card-header" className="flex flex-col gap-1.5 p-0">
-        <div className="relative overflow-hidden">
-          <Link className="block" to={`/product/${product.id}`}>
-            <div data-radix-aspect-ratio-wrapper="" style={{ position: 'relative', width: '100%', paddingBottom: '133.333%' }}>
-              <div data-slot="aspect-ratio" className="overflow-hidden" style={{ position: 'absolute', inset: 0 }}>
-                <img
-                  alt={product.name}
-                  className="w-full h-full object-cover"
-                  src={product.image}
-                />
-              </div>
-            </div>
+    <div className="group">
+      <div className="relative overflow-hidden rounded-lg">
+        <Link to={`/product/${id}`} className="block aspect-w-1 aspect-h-1">
+          <img
+            src={images[0]?.url}
+            alt={name}
+            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
+          />
+        </Link>
+        {stock < 50 && (
+          <span className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 text-xs rounded">
+            Low Stock
+          </span>
+        )}
+      </div>
+      <div className="mt-4 space-y-2">
+        <div className="flex justify-between items-start">
+          <Link to={`/product/${id}`} className="block">
+            <h3 className="text-sm font-medium text-gray-900 hover:text-blue-600 line-clamp-1">
+              {name}
+            </h3>
           </Link>
         </div>
-      </div>
-      <div data-slot="card-content" className="text-center p-0">
-        <Link to={`/product/${product.id}`}>
-          <h3 className="text-base font-medium text-gray-900 hover:text-blue-600">
-            {product.name}
-          </h3>
-        </Link>
-        <div className="text-sm text-gray-500 mt-1">{product.category}</div>
-        <div className="mt-2 flex items-center justify-center gap-2">
-          <span className="text-lg font-bold text-blue-600">{product.price} ₺</span>
+        <p className="text-sm text-gray-500 line-clamp-2">{description}</p>
+        <div className="flex items-center space-x-1">
+          {renderRatingStars()}
+          <span className="text-xs text-gray-500 ml-1">({sell_count} sold)</span>
         </div>
-        <div className="mt-3 flex items-center justify-center gap-2">
-          {product.colors?.map((color, index) => (
-            <div
-              key={index}
-              className="w-3 h-3 rounded-full cursor-pointer hover:ring-2 hover:ring-offset-1 hover:ring-gray-300 transition-all"
-              style={{ backgroundColor: color }}
-            />
-          ))}
+        <div className="flex items-center justify-between">
+          <p className="text-lg font-semibold text-blue-600">{price.toFixed(2)} ₺</p>
+          {stock > 0 ? (
+            <span className="text-sm text-green-600">{stock} in stock</span>
+          ) : (
+            <span className="text-sm text-red-600">Out of stock</span>
+          )}
         </div>
       </div>
     </div>
