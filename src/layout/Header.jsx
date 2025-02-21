@@ -70,10 +70,10 @@ const Header = () => {
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
               >
-                <button className="flex items-center space-x-1 text-gray-700 hover:text-blue-600">
+                <Link to="/shop" className="flex items-center space-x-1 text-gray-700 hover:text-blue-600">
                   <span>Shop</span>
                   <ChevronDown size={16} />
-                </button>
+                </Link>
                 {isShopDropdownOpen && (
                   <div className="absolute left-0 mt-2 w-screen max-w-6xl bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 -translate-x-1/3">
                     <div className="p-6">
