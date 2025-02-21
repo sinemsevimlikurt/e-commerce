@@ -17,7 +17,7 @@ const SignupPage = () => {
         reset,
     } = useForm({
         defaultValues: {
-            role_id: "3" // Customer role as default
+            role_id: "1" // Customer role as default
         }
     });
 
@@ -27,7 +27,16 @@ const SignupPage = () => {
         const fetchRoles = async () => {
             try {
                 const response = await api.get('/roles');
-                setRoles(response.data);
+                const customerRole = response.data.find(role => role.name.toLowerCase() === 'customer');
+                if (customerRole) {
+                    const sortedRoles = [
+                        customerRole,
+                        ...response.data.filter(role => role.id !== customerRole.id)
+                    ];
+                    setRoles(sortedRoles);
+                } else {
+                    setRoles(response.data);
+                }
             } catch (err) {
                 setError('Failed to fetch roles');
             }
@@ -176,10 +185,11 @@ const SignupPage = () => {
                                         <div className="mt-1">
                                             <select
                                                 {...register('role_id')}
+                                                defaultValue="1"
                                                 className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                                             >
                                                 {roles.map(role => (
-                                                    <option key={role.id} value={role.id}>
+                                                    <option key={role.id} value={role.id} selected={role.name.toLowerCase() === 'customer'}>
                                                         {role.name}
                                                     </option>
                                                 ))}
