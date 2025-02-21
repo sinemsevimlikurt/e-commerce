@@ -1,7 +1,86 @@
-import { SET_USER, SET_ROLES, SET_THEME, SET_LANGUAGE } from '../types';
+import {
+  SET_USER,
+  SET_ROLES,
+  SET_THEME,
+  SET_LANGUAGE,
+  LOGIN_SUCCESS,
+  LOGIN_FAILURE,
+  LOGOUT,
+  VERIFY_TOKEN_SUCCESS,
+  VERIFY_TOKEN_FAILURE
+} from '../types';
 import api from '../../services/api';
 
-// Synchronous action creators
+// Auth action creators
+export const loginSuccess = (user) => ({
+  type: LOGIN_SUCCESS,
+  payload: user
+});
+
+export const loginFailure = (error) => ({
+  type: LOGIN_FAILURE,
+  payload: error
+});
+
+export const logout = () => {
+  localStorage.removeItem('token');
+  delete api.defaults.headers.common['Authorization'];
+  return { type: LOGOUT };
+};
+
+export const verifyTokenSuccess = (user) => ({
+  type: VERIFY_TOKEN_SUCCESS,
+  payload: user
+});
+
+export const verifyTokenFailure = (error) => ({
+  type: VERIFY_TOKEN_FAILURE,
+  payload: error
+});
+
+// Login thunk
+export const login = (credentials, rememberMe) => async (dispatch) => {
+  try {
+    const { data } = await api.auth.login(credentials);
+    const { token, user } = data;
+
+    // Set token in axios headers
+    api.defaults.headers.common['Authorization'] = token;
+
+    // Store token if rememberMe is true
+    if (rememberMe) {
+      localStorage.setItem('token', token);
+    }
+
+    dispatch(loginSuccess(user));
+  } catch (error) {
+    dispatch(loginFailure(error.response?.data?.message || 'Login failed'));
+  }
+};
+
+// Verify token thunk
+export const verifyToken = () => async (dispatch) => {
+  const token = localStorage.getItem('token');
+
+  if (!token) {
+    return dispatch(verifyTokenFailure('No token found'));
+  }
+
+  try {
+    // Set token in axios headers
+    api.defaults.headers.common['Authorization'] = token;
+
+    const { data } = await api.auth.verify();
+    dispatch(verifyTokenSuccess(data.user));
+  } catch (error) {
+    // Clear token if verification fails
+    localStorage.removeItem('token');
+    delete api.defaults.headers.common['Authorization'];
+    dispatch(verifyTokenFailure(error.response?.data?.message || 'Token verification failed'));
+  }
+};
+
+// Other action creators
 export const setUser = (user) => ({
   type: SET_USER,
   payload: user
@@ -23,17 +102,11 @@ export const setLanguage = (language) => ({
 });
 
 // Thunk action creator for getting roles
-export const fetchRoles = () => async (dispatch, getState) => {
-  const { client } = getState();
-  
-  // Only fetch roles if they haven't been fetched yet
-  if (!client.roles || client.roles.length === 0) {
-    try {
-      const roles = await api.getRoles(); // You'll need to implement this API call
-      dispatch(setRoles(roles));
-    } catch (error) {
-      console.error('Error fetching roles:', error);
-      // You might want to dispatch an error action here
-    }
+export const fetchRoles = () => async (dispatch) => {
+  try {
+    const { data } = await api.user.getRoles();
+    dispatch(setRoles(data.roles));
+  } catch (error) {
+    console.error('Error fetching roles:', error);
   }
 };

@@ -3,39 +3,48 @@ import store from '../store';
 import { logout } from '../store/slices/authSlice';
 
 const api = axios.create({
-    baseURL: process.env.REACT_APP_API_URL || 'http://localhost:3000/api',
+    baseURL: 'https://workintech-fe-ecommerce.onrender.com',
 });
 
-export const setupAxiosInterceptors = () => {
-    const token = localStorage.getItem('token');
-    if (token) {
-        api.defaults.headers.common['Authorization'] = token;
+// Request interceptor
+api.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            config.headers.Authorization = token;
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
     }
+);
+
+// Response interceptor
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response?.status === 401) {
+            localStorage.removeItem('token');
+            delete api.defaults.headers.common['Authorization'];
+            // You might want to redirect to login page here
+        }
+        return Promise.reject(error);
+    }
+);
+
+// Authentication endpoints
+api.auth = {
+    login: (credentials) => api.post('/auth/login', credentials),
+    verify: () => api.get('/auth/verify'),
+    register: (userData) => api.post('/auth/register', userData),
 };
 
-export const verifyToken = async () => {
-    try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            return null;
-        }
-
-        api.defaults.headers.common['Authorization'] = token;
-        const response = await api.get('/verify');
-        
-        // Renew token if provided in response
-        if (response.data.token) {
-            localStorage.setItem('token', response.data.token);
-            api.defaults.headers.common['Authorization'] = response.data.token;
-        }
-        
-        return response.data.user;
-    } catch (error) {
-        localStorage.removeItem('token');
-        delete api.defaults.headers.common['Authorization'];
-        store.dispatch(logout());
-        return null;
-    }
+// User endpoints
+api.user = {
+    getRoles: () => api.get('/user/roles'),
+    getProfile: () => api.get('/user/profile'),
+    updateProfile: (data) => api.put('/user/profile', data),
 };
 
 export default api;
