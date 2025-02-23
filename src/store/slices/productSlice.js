@@ -21,10 +21,10 @@ export const fetchProductsError = (error) => ({
 });
 
 // Thunk Action Creator
-export const fetchProducts = () => async (dispatch) => {
+export const fetchProducts = (queryString) => async (dispatch) => {
     try {
         dispatch(fetchProductsStart());
-        const response = await api.products.getAll();
+        const response = await api.products.getAll(queryString);
         dispatch(fetchProductsSuccess(response.data));
     } catch (error) {
         dispatch(fetchProductsError(error.message));
