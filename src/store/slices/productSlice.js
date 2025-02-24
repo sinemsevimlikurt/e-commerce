@@ -1,70 +1,52 @@
-import api from '../../services/api';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axios from 'axios';
 
-// Action Types
-export const FETCH_PRODUCTS_START = 'product/fetchProductsStart';
-export const FETCH_PRODUCTS_SUCCESS = 'product/fetchProductsSuccess';
-export const FETCH_PRODUCTS_ERROR = 'product/fetchProductsError';
+const BASE_URL = 'https://workintech-fe-ecommerce.onrender.com';
 
-// Action Creators
-export const fetchProductsStart = () => ({
-    type: FETCH_PRODUCTS_START
-});
-
-export const fetchProductsSuccess = (data) => ({
-    type: FETCH_PRODUCTS_SUCCESS,
-    payload: data
-});
-
-export const fetchProductsError = (error) => ({
-    type: FETCH_PRODUCTS_ERROR,
-    payload: error
-});
-
-// Thunk Action Creator
-export const fetchProducts = (queryString) => async (dispatch) => {
+export const fetchProducts = createAsyncThunk(
+  'products/fetchProducts',
+  async ({ page = 1, itemsPerPage = 8, filter = '', sort = '' }) => {
     try {
-        dispatch(fetchProductsStart());
-        const response = await api.products.getAll(queryString);
-        dispatch(fetchProductsSuccess(response.data));
+      const limit = page * itemsPerPage;
+      const offset = (page - 1) * itemsPerPage;
+      
+      let url = `${BASE_URL}/products?limit=${limit}&offset=${offset}`;
+      if (filter) url += `&filter=${filter}`;
+      if (sort) url += `&sort=${sort}`;
+      
+      const response = await axios.get(url);
+      return response.data;
     } catch (error) {
-        dispatch(fetchProductsError(error.message));
+      throw error.response?.data || error.message;
     }
-};
+  }
+);
 
-// Initial State
-const initialState = {
+const productSlice = createSlice({
+  name: 'product',
+  initialState: {
     products: [],
-    total: 0,
     loading: false,
-    error: null
-};
+    error: null,
+    totalProducts: 0
+  },
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchProducts.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchProducts.fulfilled, (state, action) => {
+        state.loading = false;
+        state.products = action.payload.products;
+        state.totalProducts = action.payload.total;
+      })
+      .addCase(fetchProducts.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+      });
+  },
+});
 
-// Reducer
-const productReducer = (state = initialState, action) => {
-    switch (action.type) {
-        case FETCH_PRODUCTS_START:
-            return {
-                ...state,
-                loading: true,
-                error: null
-            };
-        case FETCH_PRODUCTS_SUCCESS:
-            return {
-                ...state,
-                loading: false,
-                products: action.payload.products,
-                total: action.payload.total,
-                error: null
-            };
-        case FETCH_PRODUCTS_ERROR:
-            return {
-                ...state,
-                loading: false,
-                error: action.payload
-            };
-        default:
-            return state;
-    }
-};
-
-export default productReducer;
+export default productSlice.reducer;
