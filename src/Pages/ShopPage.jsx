@@ -1,21 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useParams, useLocation, useHistory } from 'react-router-dom';
-import { Grid3x3, List, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Grid3x3, List } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { fetchProducts } from '../store/slices/productSlice';
-
-const categories = [
-  { id: 1, name: 'Tişört', image: 'https://workintech-fe-ecommerce.onrender.com/assets/category-img/category_kadın_tişört.jpg' },
-  { id: 2, name: 'Ayakkabı', image: 'https://workintech-fe-ecommerce.onrender.com/assets/category-img/category_kadın_ayakkabı.jpg' },
-  { id: 3, name: 'Ceket', image: 'https://workintech-fe-ecommerce.onrender.com/assets/category-img/category_kadın_ceket.jpg' },
-  { id: 4, name: 'Elbise', image: 'https://workintech-fe-ecommerce.onrender.com/assets/category-img/category_kadın_elbise.jpg' },
-  { id: 5, name: 'Etek', image: 'https://workintech-fe-ecommerce.onrender.com/assets/category-img/category_kadın_etek.jpg' },
-  { id: 6, name: 'Gömlek', image: 'https://workintech-fe-ecommerce.onrender.com/assets/category-img/category_kadın_gömlek.jpg' },
-  { id: 7, name: 'Kazak', image: 'https://workintech-fe-ecommerce.onrender.com/assets/category-img/category_kadın_kazak.jpg' },
-  { id: 8, name: 'Pantalon', image: 'https://workintech-fe-ecommerce.onrender.com/assets/category-img/category_kadın_pantalon.jpg' },
-];
+import ReactPaginate from 'react-paginate';
 
 const ShopPage = () => {
   const dispatch = useDispatch();
@@ -30,9 +20,9 @@ const ShopPage = () => {
   const [sort, setSort] = useState(searchParams.get('sort') || '');
   const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState('grid');
-  const productsPerPage = 12;
+  const itemsPerPage = 8; 
 
-  // Update URL with current filters
+  // Update URL with current filters and pagination
   const updateURL = (newParams) => {
     const currentParams = new URLSearchParams(location.search);
     
@@ -53,28 +43,37 @@ const ShopPage = () => {
   const handleFilterChange = (e) => {
     const value = e.target.value;
     setFilter(value);
-    updateURL({ filter: value, sort });
+    setCurrentPage(1); 
+    updateURL({ filter: value, sort, page: 1 });
   };
 
   // Handle sort change
   const handleSortChange = (e) => {
     const value = e.target.value;
     setSort(value);
-    updateURL({ filter, sort: value });
+    setCurrentPage(1); 
+    updateURL({ filter, sort: value, page: 1 });
   };
 
-  const { products, loading, error } = useSelector((state) => state.product);
+  // Handle page change
+  const handlePageChange = ({ selected }) => {
+    const newPage = selected + 1;
+    setCurrentPage(newPage);
+    updateURL({ filter, sort, page: newPage });
+    window.scrollTo(0, 0);
+  };
+
+  const { products, loading, error, totalProducts } = useSelector((state) => state.product);
 
   useEffect(() => {
-    // Construct query parameters
-    const params = new URLSearchParams();
-    if (categoryId) params.append('category', categoryId);
-    if (filter) params.append('filter', filter);
-    if (sort) params.append('sort', sort);
-    
-    // Make API request with all parameters
-    dispatch(fetchProducts(params.toString()));
-  }, [dispatch, categoryId, filter, sort]);
+    dispatch(fetchProducts({ 
+      page: currentPage, 
+      itemsPerPage,
+      filter,
+      sort,
+      categoryId 
+    }));
+  }, [dispatch, currentPage, filter, sort, categoryId]);
 
   if (loading) return <LoadingSpinner />;
   
@@ -85,6 +84,14 @@ const ShopPage = () => {
       </div>
     );
   }
+
+  // Calculate total pages
+  const totalPages = Math.ceil(totalProducts / itemsPerPage);
+
+  // Get current page's products
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentProducts = products.slice(startIndex, endIndex);
 
   return (
     <main className="flex-grow">
@@ -172,7 +179,7 @@ const ShopPage = () => {
         {/* Products Grid */}
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className={`grid ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'} gap-6`}>
-            {products.map((product) => (
+            {currentProducts.map((product) => (
               <ProductCard
                 key={product.id}
                 product={product}
@@ -180,6 +187,29 @@ const ShopPage = () => {
               />
             ))}
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="mt-8">
+              <ReactPaginate
+                previousLabel={'Previous'}
+                nextLabel={'Next'}
+                breakLabel={'...'}
+                pageCount={totalPages}
+                marginPagesDisplayed={2}
+                pageRangeDisplayed={5}
+                onPageChange={handlePageChange}
+                containerClassName={'pagination flex justify-center gap-2'}
+                activeClassName={'active bg-indigo-600 text-white'}
+                pageClassName={'page-item px-3 py-2 rounded-md border hover:bg-gray-50'}
+                previousClassName={'page-item px-3 py-2 rounded-md border hover:bg-gray-50'}
+                nextClassName={'page-item px-3 py-2 rounded-md border hover:bg-gray-50'}
+                breakClassName={'page-item px-3 py-2'}
+                disabledClassName={'opacity-50 cursor-not-allowed'}
+                forcePage={currentPage - 1}
+              />
+            </div>
+          )}
         </div>
       </div>
     </main>
