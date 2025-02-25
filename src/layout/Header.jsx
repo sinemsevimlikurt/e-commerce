@@ -1,11 +1,44 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Phone, Mail, Instagram, Youtube, Facebook, Twitter, Heart, ShoppingCart, User, Search, ChevronDown, ChevronRight } from 'lucide-react';
+import { useSelector, useDispatch } from 'react-redux';
+import { Phone, Mail, Instagram, Youtube, Facebook, Twitter, Heart, ShoppingCart, User, Search, ChevronDown, ChevronRight, X } from 'lucide-react';
+import { toggleCart, removeFromCart, updateItemCount } from '../store/slices/cartSlice';
 
 const Header = () => {
+  const dispatch = useDispatch();
+  const cartItems = useSelector((state) => state.cart.items);
+  const isCartOpen = useSelector((state) => state.cart.isOpen);
+  const [isCartHovered, setIsCartHovered] = useState(false);
+  const cartRef = useRef(null);
+  const cartTimeoutRef = useRef(null);
   const [isShopDropdownOpen, setIsShopDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const timerRef = useRef(null);
+
+  const handleCartMouseEnter = () => {
+    if (cartTimeoutRef.current) {
+      clearTimeout(cartTimeoutRef.current);
+    }
+    setIsCartHovered(true);
+  };
+
+  const handleCartMouseLeave = () => {
+    cartTimeoutRef.current = setTimeout(() => {
+      setIsCartHovered(false);
+    }, 300);
+  };
+
+  const handleRemoveFromCart = (productId) => {
+    dispatch(removeFromCart({ productId }));
+  };
+
+  const handleUpdateCount = (productId, newCount) => {
+    dispatch(updateItemCount({ productId, count: newCount }));
+  };
+
+  const cartTotal = cartItems.reduce((total, item) => {
+    return total + (item.product.price * item.count);
+  }, 0);
 
   const handleMouseEnter = () => {
     if (timerRef.current) {
@@ -27,6 +60,17 @@ const Header = () => {
       }
     };
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isCartOpen && !event.target.closest('.cart-dropdown')) {
+        dispatch(toggleCart());
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isCartOpen, dispatch]);
 
   return (
     <header className="w-full">
@@ -167,10 +211,93 @@ const Header = () => {
               <button className="flex items-center">
                 <Search size={16} className="mr-1" />
               </button>
-              <button className="flex items-center">
-                <ShoppingCart size={16} className="mr-1" />
-                <span className="text-xs">1</span>
-              </button>
+              <div 
+                className="relative"
+                ref={cartRef}
+                onMouseEnter={handleCartMouseEnter}
+                onMouseLeave={handleCartMouseLeave}
+              >
+                <Link to="/cart" className="flex items-center">
+                  <ShoppingCart size={16} className="mr-1" />
+                  {cartItems.length > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
+                      {cartItems.length}
+                    </span>
+                  )}
+                </Link>
+                
+                {isCartHovered && (
+                  <div 
+                    className="cart-dropdown absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-50 border border-gray-200"
+                    onMouseEnter={handleCartMouseEnter}
+                    onMouseLeave={handleCartMouseLeave}
+                  >
+                    <div className="p-4">
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-medium">Sepetim ({cartItems.length})</h3>
+                      </div>
+                      {cartItems.length === 0 ? (
+                        <div className="text-center py-4">
+                          <p className="text-gray-500">Sepetiniz boş</p>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="max-h-96 overflow-auto">
+                            {cartItems.map((item) => (
+                              <div key={item.product.id} className="flex items-center py-4 border-b border-gray-100">
+                                <img 
+                                  src={item.product.images[0] || 'https://via.placeholder.com/100'} 
+                                  alt={item.product.name} 
+                                  className="w-16 h-16 object-cover rounded"
+                                />
+                                <div className="ml-4 flex-grow">
+                                  <h4 className="text-sm font-medium">{item.product.name}</h4>
+                                  <p className="text-sm text-gray-500">{item.product.price} TL</p>
+                                  <div className="flex items-center mt-2">
+                                    <button 
+                                      onClick={() => handleUpdateCount(item.product.id, Math.max(1, item.count - 1))}
+                                      className="text-gray-500 hover:text-gray-700 px-2"
+                                    >
+                                      -
+                                    </button>
+                                    <span className="mx-2 text-sm">{item.count}</span>
+                                    <button 
+                                      onClick={() => handleUpdateCount(item.product.id, item.count + 1)}
+                                      className="text-gray-500 hover:text-gray-700 px-2"
+                                    >
+                                      +
+                                    </button>
+                                    <button 
+                                      onClick={() => handleRemoveFromCart(item.product.id)}
+                                      className="ml-auto text-red-500 hover:text-red-700"
+                                    >
+                                      <X size={14} />
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="mt-4 pt-4 border-t border-gray-100">
+                            <div className="flex justify-between mb-4">
+                              <span className="font-medium">Toplam:</span>
+                              <span className="font-medium">
+                                {cartTotal.toFixed(2)} TL
+                              </span>
+                            </div>
+                            <Link
+                              to="/cart"
+                              className="block w-full bg-gray-900 text-white text-center py-2 rounded-md hover:bg-gray-800"
+                            >
+                              Sepete Git
+                            </Link>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
               <button className="flex items-center">
                 <Heart size={16} className="mr-1" />
                 <span className="text-xs">1</span>
