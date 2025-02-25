@@ -2,7 +2,8 @@ import React, { useEffect } from 'react';
 import { withRouter } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProductById } from '../store/slices/productSlice';
-import { ArrowLeft, Star } from 'lucide-react';
+import { addToCart } from '../store/slices/cartSlice';
+import { ArrowLeft, Star, ShoppingCart } from 'lucide-react';
 import Spinner from '../components/common/Spinner';
 
 const ProductDetailPage = ({ match, history }) => {
@@ -15,6 +16,22 @@ const ProductDetailPage = ({ match, history }) => {
       dispatch(fetchProductById(id));
     }
   }, [dispatch, id]);
+
+  const handleAddToCart = () => {
+    if (currentProduct) {
+      console.log('Adding to cart:', currentProduct);
+      dispatch(addToCart({ 
+        product: {
+          id: currentProduct.id,
+          name: currentProduct.name,
+          price: currentProduct.price,
+          images: currentProduct.images || [],
+          description: currentProduct.description,
+          stock: currentProduct.stock
+        } 
+      }));
+    }
+  };
 
   const renderRatingStars = (rating) => {
     const stars = [];
@@ -87,7 +104,7 @@ const ProductDetailPage = ({ match, history }) => {
             ${currentProduct.price.toFixed(2)}
           </div>
           
-          <div className="space-y-2">
+          <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <span className="text-gray-600">Stock:</span>
               <span className={`font-medium ${currentProduct.stock < 50 ? 'text-red-500' : 'text-green-500'}`}>
@@ -98,6 +115,18 @@ const ProductDetailPage = ({ match, history }) => {
               <span className="text-gray-600">Total Sales:</span>
               <span className="font-medium">{currentProduct.sell_count} units</span>
             </div>
+
+            <button
+              onClick={handleAddToCart}
+              disabled={currentProduct.stock === 0}
+              className={`w-full flex items-center justify-center space-x-2 py-3 px-6 rounded-lg text-white
+                ${currentProduct.stock === 0 
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : 'bg-blue-600 hover:bg-blue-700'}`}
+            >
+              <ShoppingCart size={20} />
+              <span>{currentProduct.stock === 0 ? 'Out of Stock' : 'Add to Cart'}</span>
+            </button>
           </div>
         </div>
       </div>

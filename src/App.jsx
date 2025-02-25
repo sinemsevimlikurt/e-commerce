@@ -15,6 +15,7 @@ import TeamPage from './Pages/TeamPage';
 import SignupPage from './Pages/SignupPage';
 import LoginPage from './Pages/LoginPage';
 import About from './components/about/About';
+import CartPage from './Pages/CartPage';
 import './App.css';
 
 const AppContent = () => {
@@ -44,6 +45,7 @@ const AppContent = () => {
         <Route path="/signup" component={SignupPage} />
         <Route path="/login" component={LoginPage} />
         <Route path="/about" component={About} />
+        <Route path="/cart" component={CartPage} />
       </Switch>
       <Footer />
     </div>
@@ -57,7 +59,7 @@ const App = () => {
 
   return (
     <Provider store={store}>
-      <Router>
+      <Router basename="/">
         <AppContent />
       </Router>
     </Provider>
