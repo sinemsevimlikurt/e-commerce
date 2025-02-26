@@ -1,223 +1,39 @@
-# .winsurfrules
+# Codeium IDE Rules File
 
-# Project Structure Rules
-structure:
-  src:
-    required: true
-    contents:
-      - components
-      - layout
-      - Pages
-      - services
-      - store
-      - assets
+**Instructions:**
 
-# Component Naming Rules
-naming:
-  components:
-    pattern: "^[A-Z][a-zA-Z]*$"
-    description: "Component names must be PascalCase"
-  pages:
-    pattern: "^[A-Z][a-zA-Z]*Page$"
-    description: "Page components must end with 'Page' and be PascalCase"
-  layout:
-    pattern: "^[A-Z][a-zA-Z]*$"
-    description: "Layout components must be PascalCase"
+1. **UI Library:**  
+   Use shadcn components whenever possible.
 
-# File Extension Rules
-extensions:
-  allowed:
-    - .jsx
-    - .js
-    - .css
-    - .scss
-    - .json
+2. **CSS Framework:**  
+   Use Tailwind CSS classes for styles; take a utility-first approach.
 
-# Routing Rules
-routing:
-  shop:
-    pattern: "/shop/:gender/:categoryName/:categoryId"
-    required_params:
-      - gender
-      - categoryName
-      - categoryId
-  product:
-    pattern: "/shop/:category/:subcategory/:productId"
-    required_params:
-      - category
-      - subcategory
-      - productId
+3. **Code Structure:**  
+   - Write code in modern ES6+ syntax using functional components and React Hooks.  
+   - Create a clear, readable, and modular structure.
 
-# State Management Rules
-redux:
-  slices:
-    required:
-      - auth
-      - product
-      - cart
-  actions:
-    naming: "^[a-z]+[A-Z][a-zA-Z]*$"
-    description: "Action names must be camelCase"
+4. **Accessibility & Semantics:**  
+   Pay attention to proper HTML semantics and accessibility standards (ARIA, tagging).
 
-# API Integration Rules
-api:
-  baseURL: "https://workintech-fe-ecommerce.onrender.com"
-  endpoints:
-    auth:
-      - /auth/login
-      - /auth/verify
-      - /auth/register
-    products:
-      - /products
-      - /products/:id
-      - /products/search
-    categories:
-      - /categories
-      - /categories/:id
-      - /categories/:id/products
+5. **Performance:**  
+   Use optimizations such as lazy loading, code splitting, and memoization.
 
-# Component Rules
-components:
-  ProductCard:
-    required_props:
-      - product
-    url_format: "/shop/:category/:subcategory/:id"
-  
-  ShopPage:
-    required_features:
-      - filtering
-      - sorting
-      - pagination
-    url_params:
-      - category
-      - filter
-      - sort
+6. **Code Quality:**  
+   - Write clean, DRY, and maintainable code.  
+   - Use meaningful variable and function names.  
+   - Add comment lines where necessary.
 
-# Authentication Rules
-auth:
-  token:
-    storage: "localStorage"
-    key: "token"
-  routes:
-    protected:
-      - /profile
-      - /checkout
-      - /orders
+7. **Testing:**  
+   Write unit tests and integration tests for important functionality (Jest, React Testing Library).
 
-# Error Handling Rules
-errors:
-  required_handlers:
-    - API_ERROR
-    - AUTH_ERROR
-    - VALIDATION_ERROR
+8. **Linting & Formatting:**  
+   Automatically check code standards with ESLint and Prettier.
 
-# Form Validation Rules
-validation:
-  required_fields:
-    login:
-      - email
-      - password
-    register:
-      - email
-      - password
-      - name
-    checkout:
-      - address
-      - payment_method
+9. **Documentation:**  
+   Document the code with JSDoc or similar methods.
 
-# Code Style Rules
-style:
-  indent: 2
-  quotes: "single"
-  max_line_length: 100
-  component_structure:
-    order:
-      - imports
-      - component_definition
-      - hooks
-      - handlers
-      - effects
-      - render
+10. **Security:**  
+    Take security measures for user input and async operations (XSS protection, input sanitization).
 
-# Testing Rules
-testing:
-  required_coverage: 80
-  required_tests:
-    components:
-      - ProductCard
-      - ShopPage
-      - Header
-    slices:
-      - authSlice
-      - productSlice
-
-# Documentation Rules
-documentation:
-  required:
-    - README.md
-    - API.md
-    - CONTRIBUTING.md
-  components:
-    required_sections:
-      - Props
-      - Usage
-      - Examples
-
-# Performance Rules
-performance:
-  image_formats:
-    allowed:
-      - .webp
-      - .jpg
-      - .png
-  lazy_loading:
-    required_for:
-      - images
-      - routes
-
-# Accessibility Rules
-accessibility:
-  required:
-    - aria-labels
-    - alt-texts
-    - keyboard_navigation
-    - color_contrast
-
-# Security Rules
-security:
-  required:
-    - XSS_prevention
-    - CSRF_protection
-    - secure_headers
-  forbidden:
-    - inline_scripts
-    - eval
-    - localStorage_sensitive_data
-
-# Environment Rules
-env:
-  required_variables:
-    - REACT_APP_API_URL
-    - REACT_APP_ENV
-  production:
-    sourcemaps: false
-    console_logs: false
-
-# Git Rules
-git:
-  branch_naming:
-    pattern: "^(feature|bugfix|hotfix)/[a-z0-9-]+$"
-  commit_message:
-    pattern: "^(feat|fix|docs|style|refactor|test|chore): .+$"
-
-# Dependencies Rules
-dependencies:
-  required:
-    - react
-    - react-dom
-    - react-router-dom
-    - redux
-    - axios
-  forbidden:
-    - jquery
-    - moment
+11. **Router:**  
+    Always use React Router v5 in the project.

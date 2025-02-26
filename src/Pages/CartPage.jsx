@@ -1,12 +1,13 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { removeFromCart, updateItemCount, toggleItemCheck } from '../store/slices/cartSlice';
 import { Trash2, Plus, Minus } from 'lucide-react';
 
 const CartPage = () => {
   const dispatch = useDispatch();
   const cartItems = useSelector((state) => state.cart.items);
+  const history = useHistory();
 
   const handleUpdateCount = (productId, newCount) => {
     dispatch(updateItemCount({ productId, count: Math.max(1, newCount) }));
@@ -24,6 +25,15 @@ const CartPage = () => {
     return cartItems
       .filter(item => item.checked)
       .reduce((total, item) => total + (item.product.price * item.count), 0);
+  };
+
+  const handleCheckout = () => {
+    const hasCheckedItems = cartItems.some(item => item.checked);
+    if (!hasCheckedItems) {
+      alert('Lütfen en az bir ürün seçin');
+      return;
+    }
+    history.push('/checkout');
   };
 
   if (cartItems.length === 0) {
@@ -205,7 +215,8 @@ const CartPage = () => {
 
               <button
                 className="w-full bg-[#F84B0E] text-white py-3 px-4 rounded-md hover:bg-[#E03A00] transition-colors mt-4"
-                onClick={() => {/* To be implemented */}}
+                onClick={handleCheckout}
+                disabled={!cartItems.some(item => item.checked)}
               >
                 Sepeti Onayla
               </button>

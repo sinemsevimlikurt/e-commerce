@@ -16,6 +16,7 @@ import SignupPage from './Pages/SignupPage';
 import LoginPage from './Pages/LoginPage';
 import About from './components/about/About';
 import CartPage from './Pages/CartPage';
+import CheckoutAddressPage from './Pages/CheckoutAddressPage';
 import './App.css';
 
 const AppContent = () => {
@@ -35,18 +36,21 @@ const AppContent = () => {
   return (
     <div className="App">
       <Header />
-      <Switch>
-        <Route exact path="/" component={HomePage} />
-        <Route exact path="/shop" component={ShopPage} />
-        <Route path="/shop/:gender/:categoryName/:categoryId" component={ShopPage} />
-        <Route path="/product/:id" component={ProductDetailPage} />
-        <Route path="/contact" component={ContactPage} />
-        <Route path="/team" component={TeamPage} />
-        <Route path="/signup" component={SignupPage} />
-        <Route path="/login" component={LoginPage} />
-        <Route path="/about" component={About} />
-        <Route path="/cart" component={CartPage} />
-      </Switch>
+      <main className="min-h-screen">
+        <Switch>
+          <Route exact path="/" component={HomePage} />
+          <Route exact path="/shop" component={ShopPage} />
+          <Route path="/shop/:gender/:categoryName/:categoryId" component={ShopPage} />
+          <Route path="/product/:id" component={ProductDetailPage} />
+          <Route path="/contact" component={ContactPage} />
+          <Route path="/team" component={TeamPage} />
+          <Route path="/signup" component={SignupPage} />
+          <Route path="/login" component={LoginPage} />
+          <Route path="/about" component={About} />
+          <Route path="/cart" component={CartPage} />
+          <Route exact path="/checkout" component={CheckoutAddressPage} />
+        </Switch>
+      </main>
       <Footer />
     </div>
   );
@@ -59,7 +63,7 @@ const App = () => {
 
   return (
     <Provider store={store}>
-      <Router basename="/">
+      <Router>
         <AppContent />
       </Router>
     </Provider>
