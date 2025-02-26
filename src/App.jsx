@@ -20,6 +20,7 @@ import CartPage from './Pages/CartPage';
 import CheckoutAddressPage from './Pages/CheckoutAddressPage';
 import PaymentMethodsPage from './Pages/PaymentMethodsPage';
 import CheckoutPaymentPage from './Pages/CheckoutPaymentPage';
+import OrderSuccessPage from './Pages/OrderSuccessPage';
 import './App.css';
 
 const AppContent = () => {
@@ -54,6 +55,7 @@ const AppContent = () => {
           <Route exact path="/checkout" component={CheckoutAddressPage} />
           <Route exact path="/checkout/payment" component={CheckoutPaymentPage} />
           <Route exact path="/payment-methods" component={PaymentMethodsPage} />
+          <Route exact path="/order-success" component={OrderSuccessPage} />
         </Switch>
       </main>
       <Footer />

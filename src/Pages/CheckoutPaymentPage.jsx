@@ -1,19 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-hot-toast';
 import api from '../services/api';
+import { orderService } from '../services/orderService';
+import { clearCart } from '../store/slices/cartSlice';
 
 const CheckoutPaymentPage = () => {
   const history = useHistory();
+  const dispatch = useDispatch();
+  const cartItems = useSelector((state) => state.cart.items);
   const [selectedCard, setSelectedCard] = useState(null);
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [processing, setProcessing] = useState(false);
   const [installmentOptions, setInstallmentOptions] = useState([]);
   const [selectedInstallment, setSelectedInstallment] = useState(1);
+  const [ccv, setCcv] = useState('');
+
+  const selectedAddress = useSelector((state) => state.checkout?.selectedAddress);
+  const totalPrice = cartItems.reduce((sum, item) => sum + (item.product.price * item.count), 0);
 
   useEffect(() => {
+    if (!selectedAddress) {
+      history.push('/checkout');
+      return;
+    }
     fetchCards();
-  }, []);
+  }, [selectedAddress, history]);
 
   const fetchCards = async () => {
     try {
@@ -28,33 +42,45 @@ const CheckoutPaymentPage = () => {
 
   const handleCardSelect = (card) => {
     setSelectedCard(card);
-    // In a real application, you would fetch installment options here
     setInstallmentOptions([
-      { months: 1, amount: 8448.99 },
-      { months: 3, amount: 2816.33 },
-      { months: 6, amount: 1408.17 },
-      { months: 9, amount: 938.78 }
+      { months: 1, amount: totalPrice },
+      { months: 3, amount: totalPrice / 3 },
+      { months: 6, amount: totalPrice / 6 },
+      { months: 9, amount: totalPrice / 9 }
     ]);
   };
 
   const handlePayment = async () => {
-    if (!selectedCard) {
-      toast.error('Lütfen bir kart seçin');
+    if (!selectedCard || !ccv || !selectedAddress) {
+      toast.error('Lütfen tüm alanları doldurun');
       return;
     }
 
+    if (ccv.length !== 3) {
+      toast.error('Geçersiz CCV');
+      return;
+    }
+
+    setProcessing(true);
     try {
-      // In a real application, you would send payment details to your API
-      await api.post('/payment/process', {
-        cardId: selectedCard.id,
-        installments: selectedInstallment,
-        amount: 8448.99
+      await orderService.createOrder({
+        addressId: selectedAddress.id,
+        cardNo: selectedCard.card_no,
+        cardName: selectedCard.name_on_card,
+        expireMonth: selectedCard.expire_month,
+        expireYear: selectedCard.expire_year,
+        ccv: parseInt(ccv),
+        totalPrice,
+        products: cartItems
       });
-      
-      toast.success('Ödeme başarıyla tamamlandı');
-      history.push('/order-confirmation');
+
+      dispatch(clearCart());
+      toast.success('Siparişiniz başarıyla oluşturuldu!');
+      history.push('/order-success');
     } catch (error) {
-      toast.error('Ödeme işlemi sırasında bir hata oluştu');
+      toast.error(error.response?.data?.message || 'Sipariş oluşturulurken bir hata oluştu');
+    } finally {
+      setProcessing(false);
     }
   };
 
@@ -114,6 +140,23 @@ const CheckoutPaymentPage = () => {
                     </button>
                   </div>
 
+                  {selectedCard && (
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        CCV
+                      </label>
+                      <input
+                        type="text"
+                        maxLength="3"
+                        pattern="\d{3}"
+                        value={ccv}
+                        onChange={(e) => setCcv(e.target.value.replace(/\D/g, ''))}
+                        className="w-24 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-500"
+                        required
+                      />
+                    </div>
+                  )}
+
                   {selectedCard && installmentOptions.length > 0 && (
                     <div className="mt-8">
                       <h3 className="text-lg font-medium mb-4">Taksit Seçenekleri</h3>
@@ -153,7 +196,7 @@ const CheckoutPaymentPage = () => {
               <div className="space-y-4">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Ürünün Toplamı</span>
-                  <span className="font-medium">8.448,99 TL</span>
+                  <span className="font-medium">{totalPrice.toFixed(2)} TL</span>
                 </div>
                 
                 <div className="flex justify-between">
@@ -170,7 +213,7 @@ const CheckoutPaymentPage = () => {
                   <div className="flex justify-between items-center">
                     <span className="font-semibold">Toplam</span>
                     <span className="text-xl font-bold text-orange-500">
-                      8.448,99 TL
+                      {totalPrice.toFixed(2)} TL
                     </span>
                   </div>
                   <div className="text-sm text-gray-500 mt-1 text-right">
@@ -180,14 +223,14 @@ const CheckoutPaymentPage = () => {
 
                 <button
                   onClick={handlePayment}
-                  disabled={!selectedCard}
+                  disabled={!selectedCard || !ccv || processing}
                   className={`w-full py-3 px-4 rounded-md transition-colors mt-4 ${
-                    selectedCard
+                    selectedCard && ccv && !processing
                       ? 'bg-orange-500 text-white hover:bg-orange-600'
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
                 >
-                  Ödemeyi Tamamla
+                  {processing ? 'İşleniyor...' : 'Ödemeyi Tamamla'}
                 </button>
               </div>
             </div>
