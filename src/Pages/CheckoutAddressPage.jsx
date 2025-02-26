@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { setSelectedAddress } from '../store/slices/checkoutSlice';
 
 const CheckoutAddressPage = () => {
   const history = useHistory();
+  const dispatch = useDispatch();
   const [addresses, setAddresses] = useState([
     {
       id: 1,
@@ -31,10 +34,12 @@ const CheckoutAddressPage = () => {
   });
 
   const handleAddressSelect = (id) => {
+    const selectedAddr = addresses.find(addr => addr.id === id);
     setAddresses(addresses.map(addr => ({
       ...addr,
       selected: addr.id === id
     })));
+    dispatch(setSelectedAddress(selectedAddr));
   };
 
   const handleNewAddressSubmit = (e) => {
@@ -46,6 +51,16 @@ const CheckoutAddressPage = () => {
     ]);
     setShowNewAddressForm(false);
     setNewAddress({ type: 'Ev', name: '', fullAddress: '', phone: '' });
+  };
+
+  const handleContinue = () => {
+    const selectedAddr = addresses.find(addr => addr.selected);
+    if (!selectedAddr) {
+      // toast.error('Lütfen bir teslimat adresi seçin');
+      return;
+    }
+    dispatch(setSelectedAddress(selectedAddr));
+    history.push('/checkout/payment');
   };
 
   return (
@@ -214,7 +229,7 @@ const CheckoutAddressPage = () => {
                 </div>
 
                 <button
-                  onClick={() => history.push('/checkout/payment')}
+                  onClick={handleContinue}
                   className="w-full bg-orange-500 text-white py-3 px-4 rounded-md hover:bg-orange-600 transition-colors mt-4"
                 >
                   Kaydet ve Devam Et
