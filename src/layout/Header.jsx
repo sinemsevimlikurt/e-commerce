@@ -1,14 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { Phone, Mail, Instagram, Youtube, Facebook, Twitter, Heart, ShoppingCart, User, Search, ChevronDown, ChevronRight, X } from 'lucide-react';
 import { toggleCart, removeFromCart, updateItemCount } from '../store/slices/cartSlice';
+import { logout } from '../store/slices/authSlice';
 
 const Header = () => {
   const dispatch = useDispatch();
+  const history = useHistory();
   const cartItems = useSelector((state) => state.cart.items);
   const isCartOpen = useSelector((state) => state.cart.isOpen);
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const user = useSelector((state) => state.auth.user);
   const [isCartHovered, setIsCartHovered] = useState(false);
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const cartRef = useRef(null);
   const cartTimeoutRef = useRef(null);
   const [isShopDropdownOpen, setIsShopDropdownOpen] = useState(false);
@@ -204,10 +209,52 @@ const Header = () => {
               <Link to="/pages" className="text-[#737373] hover:text-[#23856D] text-sm font-medium">Pages</Link>
             </div>
             <div className="flex items-center space-x-6 text-[#23A6F0]">
-              <Link to="/login" className="flex items-center text-sm font-medium">
-                <User size={16} className="mr-1" />
-                Login / Register
-              </Link>
+              {isAuthenticated ? (
+                <div className="relative">
+                  <button
+                    onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                    className="flex items-center text-sm font-medium"
+                  >
+                    <User size={16} className="mr-1" />
+                    {user?.name || 'Hesabım'}
+                    <ChevronDown size={14} className="ml-1" />
+                  </button>
+                  {isUserDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50 border border-gray-200">
+                      <div className="py-1">
+                        <Link
+                          to="/profile"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          Profilim
+                        </Link>
+                        <Link
+                          to="/orders"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          Siparişlerim
+                        </Link>
+                        <button
+                          onClick={() => {
+                            dispatch(logout());
+                            localStorage.removeItem('token');
+                            history.push('/');
+                            setIsUserDropdownOpen(false);
+                          }}
+                          className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                        >
+                          Çıkış Yap
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link to="/login" className="flex items-center text-sm font-medium">
+                  <User size={16} className="mr-1" />
+                  Login / Register
+                </Link>
+              )}
               <button className="flex items-center">
                 <Search size={16} className="mr-1" />
               </button>
