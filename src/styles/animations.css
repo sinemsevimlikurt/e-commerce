@@ -1,0 +1,12 @@
+@keyframes highlight {
+  0% {
+    background-color: rgba(249, 115, 22, 0.2); /* orange-500 with opacity */
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.animate-highlight {
+  animation: highlight 2s ease-out;
+}

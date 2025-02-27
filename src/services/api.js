@@ -3,7 +3,12 @@ import store from '../store';
 import { logout } from '../store/slices/authSlice';
 
 const api = axios.create({
-    baseURL: 'https://workintech-fe-ecommerce.onrender.com',
+    baseURL: '/api',
+    headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+    },
+    withCredentials: true
 });
 
 export const setupAxiosInterceptors = () => {
@@ -60,6 +65,7 @@ api.user = {
     getRoles: () => api.get('/user/roles'),
     getProfile: () => api.get('/user/profile'),
     updateProfile: (data) => api.put('/user/profile', data),
+    getOrders: () => api.get('/user/orders'),
 };
 
 // Categories endpoints
